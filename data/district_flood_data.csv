@@ -1,5 +1,5 @@
 ﻿District,Year,Flood_event_count,Affected_population,Severity_index,avg_rainfall_mm,Road_disruption_level,Ambulances needed
-Kandy,2010,2,300,3,150,3,98
+Kandy,2010,2,300,3,150,3,5
 Kandy,2011,2,340,3,160,3,5
 Kandy,2012,2,380,3,170,3,5
 Kandy,2013,1,280,2,140,2,3
