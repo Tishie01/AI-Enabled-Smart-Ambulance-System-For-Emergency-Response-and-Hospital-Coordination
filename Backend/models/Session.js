@@ -5,7 +5,12 @@ const HealthPointSchema = new mongoose.Schema({
   heartRate: Number,
   bodyTemperature: Number,
   bloodOxygen: Number,
-  note: String
+  note: String,
+  riskPrediction: {
+    prediction: String,  // "High Risk" or "Low Risk"
+    riskScore: Number,   // Probability score (0-1)
+    timestamp: Date
+  }
 });
 
 const SessionSchema = new mongoose.Schema({

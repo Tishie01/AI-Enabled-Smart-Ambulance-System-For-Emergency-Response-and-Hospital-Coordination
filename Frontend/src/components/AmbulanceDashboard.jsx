@@ -47,6 +47,8 @@ export default function AmbulanceDashboard({ ambulanceId, onLogout }){
     socketRef.current.emit('joinSession', { sessionId, role: 'paramedic' });
     
     socketRef.current.on('health:update', (point)=>{
+      console.log('📊 Received health update:', point);
+      console.log('🔮 Risk prediction in point:', point.riskPrediction);
       setHealth(h=>[...h, point]);
     });
     socketRef.current.on('chat:message', (msg)=>{
@@ -271,6 +273,12 @@ function SessionForm({ form, setForm, onStart }) {
 
 function ActiveSession({ session, health, chat, manualHealth, setManualHealth, onStop, onEnd, onSendHealth, onSendChat }) {
   const latestHealth = health[health.length - 1]
+  const latestRisk = latestHealth?.riskPrediction
+  
+  // Debug logging
+  console.log('🔍 Latest health data:', latestHealth);
+  console.log('🔍 Latest risk prediction:', latestRisk);
+  console.log('🔍 Total health entries:', health.length);
 
   return (
     <div className="space-y-6">
@@ -300,6 +308,49 @@ function ActiveSession({ session, health, chat, manualHealth, setManualHealth, o
           </div>
         </div>
       </div>
+
+      {/* AI Risk Assessment Banner */}
+      {latestRisk && (
+        <div className={`rounded-xl shadow-lg border-2 p-6 ${
+          latestRisk.prediction === 'High Risk' 
+            ? 'bg-gradient-to-r from-red-50 to-red-100 border-red-400' 
+            : 'bg-gradient-to-r from-green-50 to-green-100 border-green-400'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl ${
+                latestRisk.prediction === 'High Risk' ? 'bg-red-200' : 'bg-green-200'
+              }`}>
+                {latestRisk.prediction === 'High Risk' ? '⚠️' : '✅'}
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-600 mb-1">AI Risk Assessment</h3>
+                <p className={`text-3xl font-bold ${
+                  latestRisk.prediction === 'High Risk' ? 'text-red-700' : 'text-green-700'
+                }`}>
+                  {latestRisk.prediction}
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-semibold text-gray-600 mb-1">Risk Score</p>
+              <p className={`text-4xl font-bold ${
+                latestRisk.prediction === 'High Risk' ? 'text-red-700' : 'text-green-700'
+              }`}>
+                {(latestRisk.riskScore * 100).toFixed(1)}%
+              </p>
+              <div className="mt-2 w-48 bg-gray-300 rounded-full h-3">
+                <div 
+                  className={`h-3 rounded-full ${
+                    latestRisk.prediction === 'High Risk' ? 'bg-red-600' : 'bg-green-600'
+                  }`}
+                  style={{ width: `${latestRisk.riskScore * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Health Monitoring */}
@@ -348,16 +399,58 @@ function ActiveSession({ session, health, chat, manualHealth, setManualHealth, o
           {/* Health History */}
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
             <h3 className="font-bold text-lg text-gray-800 mb-4">Health Data Log ({health.length})</h3>
-            <div className="max-h-64 overflow-auto space-y-2">
-              {health.slice().reverse().map((h, i) => (
-                <div key={i} className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-red-600">❤️ {h.heartRate} bpm</span>
-                    <span className="font-semibold text-orange-600">🌡️ {h.bodyTemperature}°C</span>
-                    <span className="font-semibold text-blue-600">🫁 {h.bloodOxygen}%</span>
-                  </div>
-                </div>
-              ))}
+            <div className="max-h-96 overflow-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-100 sticky top-0">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-700">#</th>
+                    <th className="px-3 py-2 text-center font-semibold text-gray-700">❤️ HR (bpm)</th>
+                    <th className="px-3 py-2 text-center font-semibold text-gray-700">🌡️ Temp (°C)</th>
+                    <th className="px-3 py-2 text-center font-semibold text-gray-700">🫁 SpO2 (%)</th>
+                    <th className="px-3 py-2 text-center font-semibold text-gray-700">AI Risk</th>
+                    <th className="px-3 py-2 text-center font-semibold text-gray-700">Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {health.slice().reverse().map((h, i) => (
+                    <tr key={i} className="border-b border-gray-200 hover:bg-gray-50">
+                      <td className="px-3 py-3 font-semibold text-gray-600">{health.length - i}</td>
+                      <td className="px-3 py-3 text-center">
+                        <span className="font-bold text-red-600">{h.heartRate}</span>
+                      </td>
+                      <td className="px-3 py-3 text-center">
+                        <span className="font-bold text-orange-600">{h.bodyTemperature}</span>
+                      </td>
+                      <td className="px-3 py-3 text-center">
+                        <span className="font-bold text-blue-600">{h.bloodOxygen}</span>
+                      </td>
+                      <td className="px-3 py-3 text-center">
+                        {h.riskPrediction ? (
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                            h.riskPrediction.prediction === 'High Risk'
+                              ? 'bg-red-100 text-red-700 border border-red-300'
+                              : 'bg-green-100 text-green-700 border border-green-300'
+                          }`}>
+                            {h.riskPrediction.prediction === 'High Risk' ? '⚠️' : '✅'} {(h.riskPrediction.riskScore * 100).toFixed(0)}%
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-xs">-</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-3 text-center text-xs text-gray-500">
+                        {new Date(h.timestamp).toLocaleTimeString()}
+                      </td>
+                    </tr>
+                  ))}
+                  {health.length === 0 && (
+                    <tr>
+                      <td colSpan="6" className="px-3 py-8 text-center text-gray-500">
+                        No health data recorded yet
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -615,40 +708,62 @@ function SessionDetail({ session, onBack }) {
               {session.healthPoints.length} readings
             </span>
           </h4>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {session.healthPoints.length === 0 && (
-              <p className="text-center py-8 text-gray-500">No health data recorded</p>
-            )}
-            {session.healthPoints.slice().reverse().map((h, i) => (
-              <div key={i} className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-300 rounded-lg p-4">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="font-bold text-gray-700 text-sm">Reading #{session.healthPoints.length - i}</span>
-                  <span className="text-xs text-gray-500 flex items-center">
-                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                    </svg>
-                    {new Date(h.timestamp).toLocaleString()}
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3 text-center">
-                    <p className="text-2xl mb-1">❤️</p>
-                    <p className="text-2xl font-bold text-red-600">{h.heartRate}</p>
-                    <p className="text-xs text-gray-600 mt-1">bpm</p>
-                  </div>
-                  <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-3 text-center">
-                    <p className="text-2xl mb-1">🌡️</p>
-                    <p className="text-2xl font-bold text-orange-600">{h.bodyTemperature}</p>
-                    <p className="text-xs text-gray-600 mt-1">°C</p>
-                  </div>
-                  <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 text-center">
-                    <p className="text-2xl mb-1">🫁</p>
-                    <p className="text-2xl font-bold text-blue-600">{h.bloodOxygen}</p>
-                    <p className="text-xs text-gray-600 mt-1">%</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="max-h-96 overflow-y-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead className="bg-gradient-to-r from-gray-100 to-gray-200 sticky top-0">
+                <tr>
+                  <th className="px-3 py-3 text-left font-bold text-gray-700 border-b-2 border-gray-300">#</th>
+                  <th className="px-3 py-3 text-center font-bold text-gray-700 border-b-2 border-gray-300">❤️ HR (bpm)</th>
+                  <th className="px-3 py-3 text-center font-bold text-gray-700 border-b-2 border-gray-300">🌡️ Temp (°C)</th>
+                  <th className="px-3 py-3 text-center font-bold text-gray-700 border-b-2 border-gray-300">🫁 SpO2 (%)</th>
+                  <th className="px-3 py-3 text-center font-bold text-gray-700 border-b-2 border-gray-300">AI Risk Assessment</th>
+                  <th className="px-3 py-3 text-center font-bold text-gray-700 border-b-2 border-gray-300">Timestamp</th>
+                </tr>
+              </thead>
+              <tbody>
+                {session.healthPoints.length === 0 && (
+                  <tr>
+                    <td colSpan="6" className="px-3 py-8 text-center text-gray-500">
+                      No health data recorded
+                    </td>
+                  </tr>
+                )}
+                {session.healthPoints.slice().reverse().map((h, i) => (
+                  <tr key={i} className="border-b border-gray-200 hover:bg-blue-50 transition">
+                    <td className="px-3 py-4 font-bold text-gray-700">{session.healthPoints.length - i}</td>
+                    <td className="px-3 py-4 text-center">
+                      <span className="text-xl font-bold text-red-600">{h.heartRate}</span>
+                    </td>
+                    <td className="px-3 py-4 text-center">
+                      <span className="text-xl font-bold text-orange-600">{h.bodyTemperature}</span>
+                    </td>
+                    <td className="px-3 py-4 text-center">
+                      <span className="text-xl font-bold text-blue-600">{h.bloodOxygen}</span>
+                    </td>
+                    <td className="px-3 py-4 text-center">
+                      {h.riskPrediction ? (
+                        <div>
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold inline-block ${
+                            h.riskPrediction.prediction === 'High Risk'
+                              ? 'bg-red-100 text-red-700 border-2 border-red-400'
+                              : 'bg-green-100 text-green-700 border-2 border-green-400'
+                          }`}>
+                            {h.riskPrediction.prediction === 'High Risk' ? '⚠️ High Risk' : '✅ Low Risk'}
+                          </span>
+                          <div className="text-xs text-gray-600 mt-1 font-semibold">{(h.riskPrediction.riskScore * 100).toFixed(1)}%</div>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-xs">No prediction</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-4 text-center text-xs text-gray-600">
+                      <div>{new Date(h.timestamp).toLocaleDateString()}</div>
+                      <div className="font-semibold">{new Date(h.timestamp).toLocaleTimeString()}</div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

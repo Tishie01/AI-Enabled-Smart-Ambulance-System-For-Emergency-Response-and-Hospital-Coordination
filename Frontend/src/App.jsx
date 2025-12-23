@@ -17,8 +17,10 @@ export default function App(){
     }
   }, [])
 
-  // Check if this is a guardian link
-  const isGuardianView = new URLSearchParams(window.location.search).has('sessionId')
+  // Check if this is a guardian view (either /guardian path or ?sessionId query param)
+  const path = window.location.pathname
+  const searchParams = new URLSearchParams(window.location.search)
+  const isGuardianView = path.includes('/guardian') || searchParams.has('sessionId')
 
   function handleLogin(id, tok) {
     setAmbulanceId(id)

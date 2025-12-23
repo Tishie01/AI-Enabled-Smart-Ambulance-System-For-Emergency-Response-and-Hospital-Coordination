@@ -7,6 +7,7 @@ const setupIO = require('./io');
 
 const ambulanceRoutes = require('./routes/ambulance');
 const guardianRoutes = require('./routes/guardian');
+const predictionRoutes = require('./routes/prediction');
 
 const app = express();
 app.use(cors());
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use('/api/ambulance', ambulanceRoutes);
 app.use('/api/guardian', guardianRoutes);
+app.use('/api/prediction', predictionRoutes);
 
 const PORT = process.env.PORT || 4000;
 
