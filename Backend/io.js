@@ -17,11 +17,9 @@ async function predictRisk(healthData, patientAge) {
 
     // Use the properly trained ML model (predictor.py with Random Forest + StandardScaler)
     const pythonScript = path.join(__dirname, 'AI-Model', 'predictor.py');
-    const pythonPath = path.join(__dirname, 'AI-Model', 'venv', 'bin', 'python3');
     console.log('📁 Python script path:', pythonScript);
-    console.log('🐍 Python executable path:', pythonPath);
     
-    const pythonProcess = spawn(pythonPath, [pythonScript, JSON.stringify(inputData)]);
+    const pythonProcess = spawn('python', [pythonScript, JSON.stringify(inputData)]);
 
     let result = '';
     let error = '';
