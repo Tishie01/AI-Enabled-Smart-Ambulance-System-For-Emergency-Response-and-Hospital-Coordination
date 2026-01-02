@@ -332,22 +332,6 @@ function ActiveSession({ session, health, chat, manualHealth, setManualHealth, o
                 </p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm font-semibold text-gray-600 mb-1">Risk Score</p>
-              <p className={`text-4xl font-bold ${
-                latestRisk.prediction === 'High Risk' ? 'text-red-700' : 'text-green-700'
-              }`}>
-                {(latestRisk.riskScore * 100).toFixed(1)}%
-              </p>
-              <div className="mt-2 w-48 bg-gray-300 rounded-full h-3">
-                <div 
-                  className={`h-3 rounded-full ${
-                    latestRisk.prediction === 'High Risk' ? 'bg-red-600' : 'bg-green-600'
-                  }`}
-                  style={{ width: `${latestRisk.riskScore * 100}%` }}
-                ></div>
-              </div>
-            </div>
           </div>
         </div>
       )}
@@ -431,7 +415,7 @@ function ActiveSession({ session, health, chat, manualHealth, setManualHealth, o
                               ? 'bg-red-100 text-red-700 border border-red-300'
                               : 'bg-green-100 text-green-700 border border-green-300'
                           }`}>
-                            {h.riskPrediction.prediction === 'High Risk' ? '⚠️' : '✅'} {(h.riskPrediction.riskScore * 100).toFixed(0)}%
+                            {h.riskPrediction.prediction === 'High Risk' ? '⚠️ High Risk' : '✅ Low Risk'}
                           </span>
                         ) : (
                           <span className="text-gray-400 text-xs">-</span>
@@ -750,7 +734,6 @@ function SessionDetail({ session, onBack }) {
                           }`}>
                             {h.riskPrediction.prediction === 'High Risk' ? '⚠️ High Risk' : '✅ Low Risk'}
                           </span>
-                          <div className="text-xs text-gray-600 mt-1 font-semibold">{(h.riskPrediction.riskScore * 100).toFixed(1)}%</div>
                         </div>
                       ) : (
                         <span className="text-gray-400 text-xs">No prediction</span>

@@ -57,7 +57,7 @@ export default function GuardianView(){
         <div className="min-h-screen flex overflow-hidden">
           {/* Left Side - Hero Section with Background Image */}
           <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-green-800 via-green-600 to-teal-600">
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070')] bg-cover bg-center opacity-20"></div>
+            <div className="absolute inset-0 bg-[url('https://png.pngtree.com/thumb_back/fw800/background/20250323/pngtree-paramedic-delivers-happy-patient-in-professional-ambulance-setting-photo-photo-image_68325444.webp')] bg-cover bg-center opacity-20"></div>
             <div className="relative z-10 flex flex-col justify-center px-12 text-white">
               <div className="mb-6">
                 <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-6 backdrop-blur-sm">
@@ -246,22 +246,6 @@ export default function GuardianView(){
                           </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-semibold text-gray-600 mb-1">Risk Score</p>
-                        <p className={`text-4xl font-bold ${
-                          latestRisk.prediction === 'High Risk' ? 'text-red-700' : 'text-green-700'
-                        }`}>
-                          {(latestRisk.riskScore * 100).toFixed(1)}%
-                        </p>
-                        <div className="mt-2 w-48 bg-gray-300 rounded-full h-3">
-                          <div 
-                            className={`h-3 rounded-full ${
-                              latestRisk.prediction === 'High Risk' ? 'bg-red-600' : 'bg-green-600'
-                            }`}
-                            style={{ width: `${latestRisk.riskScore * 100}%` }}
-                          ></div>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 )}
@@ -331,9 +315,8 @@ export default function GuardianView(){
                                       ? 'bg-red-100 text-red-700 border border-red-300'
                                       : 'bg-green-100 text-green-700 border border-green-300'
                                   }`}>
-                                    {h.riskPrediction.prediction === 'High Risk' ? '⚠️ High' : '✅ Low'}
+                                    {h.riskPrediction.prediction === 'High Risk' ? '⚠️ High Risk' : '✅ Low Risk'}
                                   </span>
-                                  <div className="text-xs text-gray-600 mt-1">{(h.riskPrediction.riskScore * 100).toFixed(0)}%</div>
                                 </div>
                               ) : (
                                 <span className="text-gray-400 text-xs">-</span>
