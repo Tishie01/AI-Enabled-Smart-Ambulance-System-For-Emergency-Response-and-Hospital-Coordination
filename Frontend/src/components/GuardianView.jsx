@@ -1,6 +1,7 @@
 import React from 'react'
 import axios from 'axios'
 import { io } from 'socket.io-client'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 export default function GuardianView(){
   const [sessionId, setSessionId] = React.useState('');
@@ -11,6 +12,7 @@ export default function GuardianView(){
   const [chat, setChat] = React.useState([]);
   const [error, setError] = React.useState('');
   const [sessionStatus, setSessionStatus] = React.useState('ongoing');
+  const [selectedChart, setSelectedChart] = React.useState('heartRate');
   const socketRef = React.useRef(null);
 
   React.useEffect(()=>{
@@ -268,6 +270,117 @@ export default function GuardianView(){
                       <p className="text-sm opacity-90">Blood Oxygen</p>
                       <p className="text-3xl font-bold mt-2">{latestHealth.bloodOxygen}<span className="text-lg ml-1">%</span></p>
                     </div>
+                  </div>
+                )}
+
+                {/* Vitals Chart */}
+                {health.length > 0 && (
+                  <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                    <h3 className="font-bold text-lg text-gray-800 mb-4 flex items-center">
+                      <svg className="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      Vitals Trends Over Time
+                    </h3>
+                    
+                    {/* Chart Type Selector */}
+                    <div className="flex gap-2 mb-4">
+                      <button
+                        onClick={() => setSelectedChart('heartRate')}
+                        className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                          selectedChart === 'heartRate'
+                            ? 'bg-red-600 text-white shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        ❤️ Heart Rate
+                      </button>
+                      <button
+                        onClick={() => setSelectedChart('temperature')}
+                        className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                          selectedChart === 'temperature'
+                            ? 'bg-orange-600 text-white shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        🌡️ Temperature
+                      </button>
+                      <button
+                        onClick={() => setSelectedChart('bloodOxygen')}
+                        className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                          selectedChart === 'bloodOxygen'
+                            ? 'bg-blue-600 text-white shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        🫁 Blood Oxygen
+                      </button>
+                    </div>
+
+                    {/* Chart Display */}
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={health.map((h, i) => ({
+                        index: i + 1,
+                        time: new Date(h.timestamp).toLocaleTimeString(),
+                        heartRate: h.heartRate,
+                        temperature: h.bodyTemperature,
+                        bloodOxygen: h.bloodOxygen
+                      }))}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                        <XAxis 
+                          dataKey="index" 
+                          label={{ value: 'Reading #', position: 'insideBottom', offset: -5 }}
+                          stroke="#666"
+                        />
+                        <YAxis 
+                          stroke="#666"
+                          label={{ 
+                            value: selectedChart === 'heartRate' ? 'Heart Rate (bpm)' : 
+                                   selectedChart === 'temperature' ? 'Temperature (°C)' : 
+                                   'Blood Oxygen (%)', 
+                            angle: -90, 
+                            position: 'insideLeft' 
+                          }}
+                        />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px' }}
+                          labelFormatter={(value) => `Reading #${value}`}
+                        />
+                        {selectedChart === 'heartRate' && (
+                          <Line 
+                            type="monotone" 
+                            dataKey="heartRate" 
+                            stroke="#dc2626" 
+                            strokeWidth={3}
+                            dot={{ fill: '#dc2626', r: 4 }}
+                            activeDot={{ r: 6 }}
+                            name="Heart Rate (bpm)"
+                          />
+                        )}
+                        {selectedChart === 'temperature' && (
+                          <Line 
+                            type="monotone" 
+                            dataKey="temperature" 
+                            stroke="#ea580c" 
+                            strokeWidth={3}
+                            dot={{ fill: '#ea580c', r: 4 }}
+                            activeDot={{ r: 6 }}
+                            name="Temperature (°C)"
+                          />
+                        )}
+                        {selectedChart === 'bloodOxygen' && (
+                          <Line 
+                            type="monotone" 
+                            dataKey="bloodOxygen" 
+                            stroke="#2563eb" 
+                            strokeWidth={3}
+                            dot={{ fill: '#2563eb', r: 4 }}
+                            activeDot={{ r: 6 }}
+                            name="Blood Oxygen (%)"
+                          />
+                        )}
+                      </LineChart>
+                    </ResponsiveContainer>
                   </div>
                 )}
 

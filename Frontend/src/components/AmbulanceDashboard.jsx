@@ -2,6 +2,7 @@ import React from 'react'
 import axios from 'axios'
 import { io } from 'socket.io-client'
 import IoTSimulator from './IoTSimulator'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 export default function AmbulanceDashboard({ ambulanceId, onLogout }){
   const [form, setForm] = React.useState({ambulanceId,paramedicName:'',paramedicId:'',patientName:'',patientAge:'',guardianNIC:'',guardianContact:'',mode:'automatic'});
@@ -12,6 +13,7 @@ export default function AmbulanceDashboard({ ambulanceId, onLogout }){
   const [pastSessions, setPastSessions] = React.useState([]);
   const [showHistory, setShowHistory] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [selectedChart, setSelectedChart] = React.useState('heartRate');
   const socketRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -169,6 +171,8 @@ export default function AmbulanceDashboard({ ambulanceId, onLogout }){
             onEnd={endSession}
             onSendHealth={sendManualHealth}
             onSendChat={sendChat}
+            selectedChart={selectedChart}
+            setSelectedChart={setSelectedChart}
           />
         )}
       </div>
@@ -271,7 +275,7 @@ function SessionForm({ form, setForm, onStart }) {
   )
 }
 
-function ActiveSession({ session, health, chat, manualHealth, setManualHealth, onStop, onEnd, onSendHealth, onSendChat }) {
+function ActiveSession({ session, health, chat, manualHealth, setManualHealth, onStop, onEnd, onSendHealth, onSendChat, selectedChart, setSelectedChart }) {
   const latestHealth = health[health.length - 1]
   const latestRisk = latestHealth?.riskPrediction
   
@@ -380,6 +384,115 @@ function ActiveSession({ session, health, chat, manualHealth, setManualHealth, o
             )}
           </div>
 
+
+          {/* Vitals Chart */}
+          {health.length > 0 && (
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+              <h3 className="font-bold text-lg text-gray-800 mb-4">Vitals Over Time</h3>
+              
+              {/* Chart Type Selector */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => setSelectedChart('heartRate')}
+                  className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                    selectedChart === 'heartRate'
+                      ? 'bg-red-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  ❤️ Heart Rate
+                </button>
+                <button
+                  onClick={() => setSelectedChart('temperature')}
+                  className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                    selectedChart === 'temperature'
+                      ? 'bg-orange-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  🌡️ Temperature
+                </button>
+                <button
+                  onClick={() => setSelectedChart('bloodOxygen')}
+                  className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                    selectedChart === 'bloodOxygen'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  🫁 Blood Oxygen
+                </button>
+              </div>
+
+              {/* Chart Display */}
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={health.map((h, i) => ({
+                  index: i + 1,
+                  time: new Date(h.timestamp).toLocaleTimeString(),
+                  heartRate: h.heartRate,
+                  temperature: h.bodyTemperature,
+                  bloodOxygen: h.bloodOxygen
+                }))}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                  <XAxis 
+                    dataKey="index" 
+                    label={{ value: 'Reading #', position: 'insideBottom', offset: -5 }}
+                    stroke="#666"
+                  />
+                  <YAxis 
+                    stroke="#666"
+                    label={{ 
+                      value: selectedChart === 'heartRate' ? 'Heart Rate (bpm)' : 
+                             selectedChart === 'temperature' ? 'Temperature (°C)' : 
+                             'Blood Oxygen (%)', 
+                      angle: -90, 
+                      position: 'insideLeft' 
+                    }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px' }}
+                    labelFormatter={(value) => `Reading #${value}`}
+                  />
+                  {selectedChart === 'heartRate' && (
+                    <Line 
+                      type="monotone" 
+                      dataKey="heartRate" 
+                      stroke="#dc2626" 
+                      strokeWidth={3}
+                      dot={{ fill: '#dc2626', r: 4 }}
+                      activeDot={{ r: 6 }}
+                      name="Heart Rate (bpm)"
+                    />
+                  )}
+                  {selectedChart === 'temperature' && (
+                    <Line 
+                      type="monotone" 
+                      dataKey="temperature" 
+                      stroke="#ea580c" 
+                      strokeWidth={3}
+                      dot={{ fill: '#ea580c', r: 4 }}
+                      activeDot={{ r: 6 }}
+                      name="Temperature (°C)"
+                    />
+                  )}
+                  {selectedChart === 'bloodOxygen' && (
+                    <Line 
+                      type="monotone" 
+                      dataKey="bloodOxygen" 
+                      stroke="#2563eb" 
+                      strokeWidth={3}
+                      dot={{ fill: '#2563eb', r: 4 }}
+                      activeDot={{ r: 6 }}
+                      name="Blood Oxygen (%)"
+                    />
+                  )}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          
+
           {/* Health History */}
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
             <h3 className="font-bold text-lg text-gray-800 mb-4">Health Data Log ({health.length})</h3>
@@ -464,6 +577,7 @@ function ActiveSession({ session, health, chat, manualHealth, setManualHealth, o
   )
 }
 
+
 function VitalCard({ icon, label, value, unit, color }) {
   const colors = {
     red: 'from-red-500 to-red-600',
@@ -472,13 +586,17 @@ function VitalCard({ icon, label, value, unit, color }) {
   }
 
   return (
-    <div className={`bg-gradient-to-br ${colors[color]} text-white rounded-xl shadow-lg p-6`}>
-      <div className="text-3xl mb-2">{icon}</div>
-      <p className="text-sm opacity-90">{label}</p>
-      <p className="text-3xl font-bold mt-2">{value}<span className="text-lg ml-1">{unit}</span></p>
+    <div className={`bg-gradient-to-br ${colors[color]} text-white rounded-xl shadow-lg p-3`}>
+      <div className="text-2xl mb-1">{icon}</div>
+      <p className="text-xs opacity-90">{label}</p>
+      <p className="text-xl font-bold mt-1">
+        {value}
+        <span className="text-sm ml-1">{unit}</span>
+      </p>
     </div>
   )
 }
+
 
 function ChatInput({ onSend }) {
   const [text, setText] = React.useState('');
