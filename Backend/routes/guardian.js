@@ -17,7 +17,7 @@ router.post('/session/:id/send-guardian-link', async (req,res)=>{
   await s.save();
   // Frontend URL instead of backend
   const link = `http://localhost:5173/?sessionId=${s._id}`;
-  const body = `Ambulance session started. Open ${link} and enter NIC ${s.guardianNIC} with OTP ${otp}`;
+  const body = `Ambulance emergency alert! Access patient monitoring: ${link}\nYour OTP: ${otp}.`;
   await sendSMS(s.guardianContact, body);
   res.json({ok:true, link});
 });
@@ -30,7 +30,20 @@ router.post('/verify', async (req,res)=>{
   s.guardianVerified = true;
   await s.save();
   const token = jwt.sign({ sessionId }, process.env.JWT_SECRET || 'dev', {expiresIn:'4h'});
-  res.json({token});
+  // Return session data including existing health points and chat history
+  res.json({
+    token,
+    session: {
+      _id: s._id,
+      status: s.status,
+      patientName: s.patientName,
+      patientAge: s.patientAge,
+      ambulanceId: s.ambulanceId,
+      paramedicName: s.paramedicName
+    },
+    healthPoints: s.healthPoints || [],
+    chat: s.chat || []
+  });
 });
 
 module.exports = router;
