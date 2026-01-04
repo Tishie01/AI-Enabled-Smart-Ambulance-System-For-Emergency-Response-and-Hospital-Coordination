@@ -99,10 +99,41 @@ export default function AmbulanceDashboard({ ambulanceId, onLogout }){
 
   function sendManualHealth(){
     if (!socketRef.current || !session) return;
+    
+    // Validate that all fields are filled
+    if (!manualHealth.heartRate || !manualHealth.bodyTemperature || !manualHealth.bloodOxygen) {
+      alert('Please fill in all vital signs (Heart Rate, Temperature, and Blood Oxygen)');
+      return;
+    }
+    
+    // Validate that values are valid numbers
+    const hr = parseFloat(manualHealth.heartRate);
+    const temp = parseFloat(manualHealth.bodyTemperature);
+    const o2 = parseFloat(manualHealth.bloodOxygen);
+    
+    if (isNaN(hr) || isNaN(temp) || isNaN(o2)) {
+      alert('Please enter valid numbers for all vital signs');
+      return;
+    }
+    
+    // Validate ranges
+    if (hr <= 0 || hr > 300) {
+      alert('Heart rate must be between 1 and 300 bpm');
+      return;
+    }
+    if (temp <= 0 || temp > 50) {
+      alert('Temperature must be between 1 and 50 °C');
+      return;
+    }
+    if (o2 <= 0 || o2 > 100) {
+      alert('Blood oxygen must be between 1 and 100 %');
+      return;
+    }
+    
     const point = { 
-      heartRate: parseFloat(manualHealth.heartRate) || 0, 
-      bodyTemperature: parseFloat(manualHealth.bodyTemperature) || 0, 
-      bloodOxygen: parseFloat(manualHealth.bloodOxygen) || 0,
+      heartRate: hr, 
+      bodyTemperature: temp, 
+      bloodOxygen: o2,
       timestamp: new Date()
     };
     socketRef.current.emit('health:update', { sessionId: session._id, point });
