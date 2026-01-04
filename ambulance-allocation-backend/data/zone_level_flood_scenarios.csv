@@ -1,0 +1,35 @@
+scenario_id,district,zone_id,hospital_name,hospital_type,distance_to_flood_km,road_accessibility,coverage_demand_shift,base_ambulance_strength
+FLOOD_S1,Kandy,KANDY_TH,Teaching Hospital Kandy,Teaching,3,4,1.2,1.3
+FLOOD_S1,Kandy,PERA_TH,Teaching Hospital Peradeniya,Teaching,3,4,1.2,1.3
+FLOOD_S1,Kandy,GAM_BH,Base Hospital Gampola,Base,8,3,1.0,1.0
+FLOOD_S1,Kandy,NAW_BH,Base Hospital Nawalapitiya,Base,8,3,1.0,1.0
+FLOOD_S1,Ratnapura,RAT_TH,Teaching Hospital Ratnapura,Teaching,3,4,1.2,1.3
+FLOOD_S1,Ratnapura,BAL_BH,Base Hospital Balangoda,Base,8,3,1.0,1.0
+FLOOD_S1,Ratnapura,EMB_BH,Base Hospital Embilipitiya,Base,8,3,1.0,1.0
+FLOOD_S1,Ratnapura,KAL_BH,Base Hospital Kalawana,Base,8,3,1.0,1.0
+FLOOD_S1,Ratnapura,KAH_BH,Base Hospital Kahawatta,Base,8,3,1.0,1.0
+FLOOD_S1,Galle,KAR_TH,Teaching Hospital Karapitiya,Teaching,3,4,1.2,1.3
+FLOOD_S1,Galle,BALP_BH,Base Hospital Balapitiya,Base,8,3,1.0,1.0
+FLOOD_S1,Galle,ELP_BH,Base Hospital Elpitiya,Base,8,3,1.0,1.0
+FLOOD_S1,Gampaha,GAM_DGH,District General Hospital Gampaha,Teaching,8,3,1.0,1.3
+FLOOD_S1,Gampaha,NEG_BH,Base Hospital Negombo,Base,8,3,1.0,1.0
+FLOOD_S1,Gampaha,WAT_BH,Base Hospital Wathupitiwala,Base,8,3,1.0,1.0
+FLOOD_S1,Nuwara Eliya,NE_BH,Base Hospital Nuwara Eliya,Base,8,3,1.0,1.0
+FLOOD_S1,Nuwara Eliya,WAL_BH,Base Hospital Walapane,Base,8,3,1.0,1.0
+FLOOD_S2,Kandy,KANDY_TH,Teaching Hospital Kandy,Teaching,6,3,1.1,1.3
+FLOOD_S2,Kandy,PERA_TH,Teaching Hospital Peradeniya,Teaching,6,3,1.1,1.3
+FLOOD_S2,Kandy,GAM_BH,Base Hospital Gampola,Base,4,2,1.3,1.0
+FLOOD_S2,Kandy,NAW_BH,Base Hospital Nawalapitiya,Base,4,2,1.3,1.0
+FLOOD_S2,Ratnapura,RAT_TH,Teaching Hospital Ratnapura,Teaching,6,3,1.1,1.3
+FLOOD_S2,Ratnapura,BAL_BH,Base Hospital Balangoda,Base,4,2,1.3,1.0
+FLOOD_S2,Ratnapura,EMB_BH,Base Hospital Embilipitiya,Base,4,2,1.3,1.0
+FLOOD_S2,Ratnapura,KAL_BH,Base Hospital Kalawana,Base,4,2,1.3,1.0
+FLOOD_S2,Ratnapura,KAH_BH,Base Hospital Kahawatta,Base,4,2,1.3,1.0
+FLOOD_S2,Galle,KAR_TH,Teaching Hospital Karapitiya,Teaching,6,3,1.1,1.3
+FLOOD_S2,Galle,BALP_BH,Base Hospital Balapitiya,Base,4,2,1.3,1.0
+FLOOD_S2,Galle,ELP_BH,Base Hospital Elpitiya,Base,4,2,1.3,1.0
+FLOOD_S2,Gampaha,GAM_DGH,District General Hospital Gampaha,Teaching,4,3,1.1,1.3
+FLOOD_S2,Gampaha,NEG_BH,Base Hospital Negombo,Base,4,2,1.3,1.0
+FLOOD_S2,Gampaha,WAT_BH,Base Hospital Wathupitiwala,Base,4,2,1.3,1.0
+FLOOD_S2,Nuwara Eliya,NE_BH,Base Hospital Nuwara Eliya,Base,4,2,1.3,1.0
+FLOOD_S2,Nuwara Eliya,WAL_BH,Base Hospital Walapane,Base,4,2,1.3,1.0
