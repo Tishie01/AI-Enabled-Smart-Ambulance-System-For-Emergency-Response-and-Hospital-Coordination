@@ -51,8 +51,28 @@ router.post('/session/:id/end', async (req,res)=>{
   if (!s) return res.status(404).json({error:'not found'});
   s.status = 'ended';
   await s.save();
-  // Build summary
-  const summary = `Session ended. Patient: ${s.patientName}, Age: ${s.patientAge}. Health points recorded: ${s.healthPoints.length}. Thank you.`;
+  
+  // Build detailed summary with last health record
+  let summary = `Hospital Arrival: ${s.patientName} (Age ${s.patientAge}) has arrived safely.\n\n`;
+  
+  // Include last health record if available
+  if (s.healthPoints && s.healthPoints.length > 0) {
+    const lastHealth = s.healthPoints[s.healthPoints.length - 1];
+    summary += `Final Vitals:\n`;
+    summary += `Heart Rate: ${lastHealth.heartRate} bpm, Temp: ${lastHealth.bodyTemperature}C, SpO2: ${lastHealth.bloodOxygen}%\n`;
+    
+    // Include AI prediction if available
+    if (lastHealth.riskPrediction) {
+      summary += `AI Risk: ${lastHealth.riskPrediction.prediction}\n`;
+    }
+    
+    summary += `Total readings: ${s.healthPoints.length}\n\n`;
+  } else {
+    summary += `Total readings: ${s.healthPoints.length}\n\n`;
+  }
+  
+  summary += `Please stay calm. Your loved one is now receiving professional medical care.`;
+  
   await sendSMS(s.guardianContact, summary);
   res.json({ok:true});
 });
