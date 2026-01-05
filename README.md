@@ -1,4 +1,4 @@
-# AI-Enabled-Smart-Ambulance-System-For-Emergency-Response-and-Hospital-Coordination
+# AI-Driven Pre-Triage System Using Mobile Vital Sensors with Real-Time Guardian Communication
 
 ## Features
 
