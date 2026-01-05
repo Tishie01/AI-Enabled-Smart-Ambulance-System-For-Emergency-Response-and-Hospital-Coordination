@@ -542,7 +542,8 @@
     
     <script>
         // Map weather conditions to better display names
-        function getWeatherDisplayName(weather) {
+        // Nighttime is determined as 6 PM (18:00) onwards until 6 AM (06:00)
+        function getWeatherDisplayName(weather, hour = null) {
             const weatherMap = {
                 'rain': 'Rainy',
                 'sun': 'Sunny',
@@ -550,9 +551,25 @@
                 'drizzle': 'Drizzly',
                 'snow': 'Snowy'
             };
-            // Convert to lowercase for lookup, then return mapped name or capitalize original
+            // Convert to lowercase for lookup
             const lowerWeather = weather.toLowerCase();
-            return weatherMap[lowerWeather] || weather.charAt(0).toUpperCase() + weather.slice(1);
+            let displayName = weatherMap[lowerWeather] || weather.charAt(0).toUpperCase() + weather.slice(1);
+            
+            // Override: If it's nighttime and model predicted "sunny", show "Clear Night" instead
+            if (lowerWeather === 'sun' || lowerWeather === 'sunny') {
+                // Check if it's nighttime (between 6 PM and 6 AM, i.e., hour >= 18 or hour < 6)
+                const currentHour = hour !== null ? hour : new Date().getHours();
+                if (currentHour >= 18 || currentHour < 6) {
+                    displayName = 'Clear Night';
+                }
+            }
+            
+            return displayName;
+        }
+        
+        // Helper function to check if it's nighttime
+        function isNighttime(hour) {
+            return hour >= 18 || hour < 6;
         }
         
         // Analyze safety at current location
@@ -626,7 +643,7 @@
                             <h3>Weather Information</h3>
                             <div class="info-item">
                                 <span class="info-label">Condition</span>
-                                <span class="info-value">${getWeatherDisplayName(weather.weather_prediction || 'Unknown')}</span>
+                                <span class="info-value">${getWeatherDisplayName(weather.weather_prediction || 'Unknown', new Date().getHours())}</span>
                             </div>
                             ${weather.weather_data ? `
                                 <div class="info-item">
@@ -681,6 +698,9 @@
                 `;
                 
                 // Recommendations
+                const currentHour = new Date().getHours();
+                const isNight = isNighttime(currentHour);
+                
                 if (safety.recommendations && safety.recommendations.length > 0) {
                     html += `
                         <div class="recommendations-card">
@@ -690,6 +710,21 @@
                                     ${rec}
                                 </div>
                             `).join('')}
+                            ${isNight ? `
+                                <div class="recommendation-item" style="border-left-color: #6366f1;">
+                                    <strong>🌙 Nighttime Safety:</strong> Exercise extra caution during nighttime hours. Reduce speed, use high beams appropriately, and be extra vigilant for pedestrians and wildlife. Ensure all vehicle lights are functioning properly.
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else if (isNight) {
+                    // Show nighttime recommendation even if no other recommendations
+                    html += `
+                        <div class="recommendations-card">
+                            <h3>Safety Recommendations</h3>
+                            <div class="recommendation-item" style="border-left-color: #6366f1;">
+                                <strong>🌙 Nighttime Safety:</strong> Exercise extra caution during nighttime hours. Reduce speed, use high beams appropriately, and be extra vigilant for pedestrians and wildlife. Ensure all vehicle lights are functioning properly.
+                            </div>
                         </div>
                     `;
                 }

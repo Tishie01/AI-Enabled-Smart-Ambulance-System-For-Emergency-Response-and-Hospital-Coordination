@@ -576,7 +576,8 @@
     
     <script>
         // Map weather conditions to better display names
-        function getWeatherDisplayName(weather) {
+        // Nighttime is determined as 6 PM (18:00) onwards until 6 AM (06:00)
+        function getWeatherDisplayName(weather, hour = null) {
             const weatherMap = {
                 'rain': 'Rainy',
                 'sun': 'Sunny',
@@ -584,9 +585,25 @@
                 'drizzle': 'Drizzly',
                 'snow': 'Snowy'
             };
-            // Convert to lowercase for lookup, then return mapped name or capitalize original
+            // Convert to lowercase for lookup
             const lowerWeather = weather.toLowerCase();
-            return weatherMap[lowerWeather] || weather.charAt(0).toUpperCase() + weather.slice(1);
+            let displayName = weatherMap[lowerWeather] || weather.charAt(0).toUpperCase() + weather.slice(1);
+            
+            // Override: If it's nighttime and model predicted "sunny", show "Clear Night" instead
+            if (lowerWeather === 'sun' || lowerWeather === 'sunny') {
+                // Check if it's nighttime (between 6 PM and 6 AM, i.e., hour >= 18 or hour < 6)
+                const currentHour = hour !== null ? hour : new Date().getHours();
+                if (currentHour >= 18 || currentHour < 6) {
+                    displayName = 'Clear Night';
+                }
+            }
+            
+            return displayName;
+        }
+        
+        // Helper function to check if it's nighttime
+        function isNighttime(hour) {
+            return hour >= 18 || hour < 6;
         }
         
         // Get current location and detect hazards
@@ -669,7 +686,7 @@
                                 </div>
                                 <div class="stat-item">
                                     <div class="stat-label">Weather Condition</div>
-                                    <div class="stat-value" style="color: #2563eb;">${getWeatherDisplayName(data.weather_prediction || 'Unknown')}</div>
+                                    <div class="stat-value" style="color: #2563eb;">${getWeatherDisplayName(data.weather_prediction || 'Unknown', new Date().getHours())}</div>
                                 </div>
                             </div>
                             <div class="recommendation">
