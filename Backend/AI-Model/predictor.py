@@ -21,13 +21,13 @@ model_pipeline = joblib.load(model_path)
 
 def predict_risk(data):
     """
-    Predict health risk based on vital signs
+    Predict health risk based on vital signs using rule-based system
     
     Args:
         data (dict): Dictionary containing:
-            - Heart Rate (int): beats per minute (40-200)
-            - Body Temperature (float): celsius (35-42)
-            - SpO2 (float): blood oxygen % (70-100)
+            - Heart Rate (int): beats per minute (Normal: 60-90)
+            - Body Temperature (float): celsius (Normal: 36-37.5)
+            - SpO2 (float): blood oxygen % (Normal: 95-100)
             - Age (int): years (0-120)
             - Gender (int): 0=Female, 1=Male
     
@@ -37,24 +37,43 @@ def predict_risk(data):
             "risk_score": float (0.0 to 1.0)
         }
     """
-    # Convert to DataFrame with exact column order used during training
-    df = pd.DataFrame([{
-        'Heart Rate': data.get('Heart Rate', data.get('heartRate', 75)),
-        'Body Temperature': data.get('Body Temperature', data.get('bodyTemperature', 37.0)),
-        'SpO2': data.get('SpO2', data.get('bloodOxygen', 98)),
-        'Age': data.get('Age', data.get('age', 40)),
-        'Gender': data.get('Gender', data.get('gender', 1))
-    }])
+    # Extract vital signs
+    heart_rate = data.get('Heart Rate', data.get('heartRate', 75))
+    body_temp = data.get('Body Temperature', data.get('bodyTemperature', 37.0))
+    spo2 = data.get('SpO2', data.get('bloodOxygen', 98))
     
-    # Make prediction using the pipeline (automatically applies StandardScaler)
-    prediction = model_pipeline.predict(df)[0]
-    probability = model_pipeline.predict_proba(df)[0][1]  # Probability of High Risk
+    # Rule-based risk assessment
+    # Normal ranges: HR 60-90, SpO2 95-97, Temp 36-37.5
+    is_high_risk = False
+    risk_factors = []
     
-    result = "High Risk" if prediction == 1 else "Low Risk"
+    # Check Heart Rate
+    if heart_rate < 60 or heart_rate > 90:
+        is_high_risk = True
+        risk_factors.append(f"Abnormal Heart Rate ({heart_rate} bpm)")
+    
+    # Check SpO2
+    if spo2 < 95 or spo2 > 100:
+        is_high_risk = True
+        risk_factors.append(f"Abnormal SpO2 ({spo2}%)")
+    
+    # Check Body Temperature
+    if body_temp < 36 or body_temp > 37.5:
+        is_high_risk = True
+        risk_factors.append(f"Abnormal Temperature ({body_temp}°C)")
+    
+    # Calculate risk score based on number of abnormal factors
+    if is_high_risk:
+        risk_score = 0.6 + (len(risk_factors) * 0.15)  # 0.75-1.0 for high risk
+        risk_score = min(risk_score, 1.0)
+        result = "High Risk"
+    else:
+        risk_score = 0.1  # Low risk score when all vitals are normal
+        result = "Low Risk"
     
     return {
         "prediction": result,
-        "risk_score": float(probability)
+        "risk_score": float(risk_score)
     }
 
 
