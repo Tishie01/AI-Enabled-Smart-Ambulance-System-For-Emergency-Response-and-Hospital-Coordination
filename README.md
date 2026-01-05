@@ -48,7 +48,7 @@ Key Functions
 
 • Provides real-time route safety insights to emergency responders.
 
-🧩 Component 03: AI-Driven Pre-Triage System Using Mobile Vital Sensors
+🧩 Component 03: AI-Driven Pre-Triage System Using Mobile Vital Sensors with Real-Time Guardian Communication
 
 This component manages patient pre-triage and real-time communication once an ambulance reaches the patient, improving transparency and preparedness before hospital arrival.
 
