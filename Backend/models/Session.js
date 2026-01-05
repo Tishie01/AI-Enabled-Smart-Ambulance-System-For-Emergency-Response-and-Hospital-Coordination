@@ -19,6 +19,7 @@ const SessionSchema = new mongoose.Schema({
   paramedicId: String,
   patientName: String,
   patientAge: Number,
+  patientGender: { type: Number, enum: [0, 1], default: 1 },  // 0=Female, 1=Male
   guardianNIC: String,
   guardianContact: String,
   mode: { type: String, enum: ['automatic','manual'], default: 'manual' },

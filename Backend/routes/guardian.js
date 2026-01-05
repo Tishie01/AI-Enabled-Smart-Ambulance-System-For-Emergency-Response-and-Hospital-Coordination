@@ -23,11 +23,15 @@ router.post('/session/:id/send-guardian-link', async (req,res)=>{
 });
 
 router.post('/verify', async (req,res)=>{
-  const { sessionId, nic, otp } = req.body;
+  const { sessionId, nic, otp, patientGender } = req.body;
   const s = await Session.findById(sessionId);
   if (!s) return res.status(404).json({error:'not found'});
   if (s.guardianNIC !== nic || s.guardianOTP !== otp) return res.status(401).json({error:'invalid'});
   s.guardianVerified = true;
+  // Update patient gender if provided
+  if (patientGender !== undefined) {
+    s.patientGender = patientGender;
+  }
   await s.save();
   const token = jwt.sign({ sessionId }, process.env.JWT_SECRET || 'dev', {expiresIn:'4h'});
   // Return session data including existing health points and chat history

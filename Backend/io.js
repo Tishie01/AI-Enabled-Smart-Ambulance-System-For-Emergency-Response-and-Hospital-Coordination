@@ -3,14 +3,14 @@ const { spawn } = require('child_process');
 const path = require('path');
 
 // Function to call AI prediction
-async function predictRisk(healthData, patientAge) {
+async function predictRisk(healthData, patientAge, patientGender) {
   return new Promise((resolve, reject) => {
     const inputData = {
       "Heart Rate": healthData.heartRate || 0,
       "Body Temperature": healthData.bodyTemperature || 0,
       "SpO2": healthData.bloodOxygen || 0,
       "Age": patientAge || 0,
-      "Gender": 1  // Default to male, can be enhanced later
+      "Gender": patientGender !== undefined ? patientGender : 1
     };
 
     console.log('🎯 Calling Python predictor with data:', inputData);
@@ -72,9 +72,9 @@ function setupIO(io){
         return;
       }
       
-      console.log('🔮 Calling AI prediction for patient age:', s.patientAge);
+      console.log('🔮 Calling AI prediction for patient age:', s.patientAge, 'gender:', s.patientGender);
       // Get AI risk prediction
-      const riskPrediction = await predictRisk(point, s.patientAge);
+      const riskPrediction = await predictRisk(point, s.patientAge, s.patientGender);
       
       console.log('✅ AI Prediction result:', riskPrediction);
       

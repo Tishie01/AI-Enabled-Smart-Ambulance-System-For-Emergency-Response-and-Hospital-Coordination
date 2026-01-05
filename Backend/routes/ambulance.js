@@ -27,9 +27,9 @@ router.post('/login', async (req,res)=>{
 });
 
 router.post('/session/start', async (req,res)=>{
-  const { ambulanceId, paramedicName,paramedicId,patientName,patientAge,guardianNIC,guardianContact,mode } = req.body;
+  const { ambulanceId, paramedicName,paramedicId,patientName,patientAge,patientGender,guardianNIC,guardianContact,mode } = req.body;
   if (!ambulanceId) return res.status(400).json({error:'ambulanceId required'});
-  const session = new Session({ ambulanceId, paramedicName,paramedicId,patientName,patientAge,guardianNIC,guardianContact,mode, status:'ongoing', startedAt:new Date() });
+  const session = new Session({ ambulanceId, paramedicName,paramedicId,patientName,patientAge,patientGender,guardianNIC,guardianContact,mode, status:'ongoing', startedAt:new Date() });
   await session.save();
   res.json({session});
 });
